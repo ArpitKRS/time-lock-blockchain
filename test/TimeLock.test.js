@@ -35,4 +35,24 @@ describe("TimeLock Smart Contract", () => {
 
         expect(isQueued).to.be.false;
     })
+
+    it("should revert if a non-owner tries to queue a transaction", async() => {
+        const target = testTimeLock.address;    
+        const value = ethers.parseEther("1");
+        const func = "test";
+        const data = " ";
+        const timestamp = (await testTimeLock.getTimestamp()).toNumber() + 10;
+
+        await expect(timelock.connect(nonOwner).queue(target, value, func, data, timestamp)).to.be.revertedWith("NotOwnerError");
+    })
+
+    it("should revert if trying to execute a non-queued transaction", async() => {
+        const target = testTimeLock.address;    
+        const value = ethers.parseEther("1");
+        const func = "test";
+        const data = " ";
+        const timestamp = (await testTimeLock.getTimestamp()).toNumber() + 10;
+
+        await expect(timeLock.execute(target, value, func, data, timestamp)).to.be.revertedWith("NotQueuedError");
+    })
 })
